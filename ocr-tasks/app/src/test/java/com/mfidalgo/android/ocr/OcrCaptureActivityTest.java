@@ -16,11 +16,13 @@
 package com.mfidalgo.android.ocr;
 
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
-public  class OcrCaptureActivityTest extends TestCase {
+public  class OcrCaptureActivityTest  {
 
-    public void testKKK (){
+    @Test
+    public void kkk (){
         assertTrue("Ole!",true);
     }
 
