@@ -18,7 +18,9 @@ package com.mfidalgo.android.ocr;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Log;
 
 import com.mfidalgo.android.camera.GraphicOverlay;
 import com.google.android.gms.vision.text.Text;
@@ -38,12 +40,14 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
 
     private static Paint sRectPaint;
     private static Paint sTextPaint;
-    private final TextBlock mText;
+    private final Text mText;
+    private final String cleanedText;
 
-    OcrGraphic(GraphicOverlay overlay, TextBlock text) {
+    OcrGraphic(GraphicOverlay overlay, Text text) {
         super(overlay);
 
         mText = text;
+        cleanedText = removeText(mText.getValue());
 
         if (sRectPaint == null) {
             sRectPaint = new Paint();
@@ -69,13 +73,14 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
         this.mId = id;
     }
 
-    public TextBlock getTextBlock() {
-        return mText;
+    public String getTextBlock() {
+        return cleanedText;
     }
 
     /**
      * Checks whether a point is within the bounding box of this graphic.
      * The provided point should be relative to this graphic's containing overlay.
+     *
      * @param x An x parameter in the relative context of the canvas.
      * @param y A y parameter in the relative context of the canvas.
      * @return True if the provided point is contained within this graphic's bounding box.
@@ -103,20 +108,94 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
             return;
         }
 
-        // Draws the bounding box around the TextBlock.
-        RectF rect = new RectF(mText.getBoundingBox());
-        rect.left = translateX(rect.left);
-        rect.top = translateY(rect.top);
-        rect.right = translateX(rect.right);
-        rect.bottom = translateY(rect.bottom);
-        canvas.drawRect(rect, sRectPaint);
+
 
         // Break the text into multiple lines and draw each one according to its own bounding box.
         List<? extends Text> textComponents = mText.getComponents();
-        for(Text currentText : textComponents) {
-            float left = translateX(currentText.getBoundingBox().left);
-            float bottom = translateY(currentText.getBoundingBox().bottom);
-            canvas.drawText(currentText.getValue(), left, bottom, sTextPaint);
+        for (Text currentText : textComponents) {
+            String cleanedText = removeText(currentText.getValue());
+            if (isNumeric(cleanedText)&& cleanedText.length()>=5) {
+
+
+                // Draws the bounding box around the TextBlock.
+                //RectF box = getBoundingBox(currentText.getBoundingBox(),currentText.getValue(),cleanedText, left);
+                //canvas.drawRect(box, sRectPaint);
+
+
+
+
+                //float letterSpace = (translateX(currentText.getBoundingBox().right) - translateX(currentText.getBoundingBox().left))/(float)currentText.getValue().length();
+                //float left = translateX(currentText.getBoundingBox().left+(firstStringPos(currentText.getValue())*letterSpace));
+                float left = translateX(currentText.getBoundingBox().left);
+                float bottom = translateY(currentText.getBoundingBox().bottom);
+                canvas.drawText(cleanedText, left, bottom, sTextPaint);
+            }
         }
     }
+
+    private RectF getBoundingBox(Rect currentBox, String originalText, String newText, float left){
+
+        float letterSpace = (translateX(currentBox.right) - translateX(currentBox.left))/(float)originalText.length();
+
+        Log.d("OCrGraphic", "Original text: " + originalText);
+        Log.d("OCrGraphic", "New text: " + newText);
+        Log.d("OCrGraphic", "Letter space " + letterSpace);
+
+
+        RectF rect = new RectF(currentBox);
+        rect.left = translateX(rect.left);
+        rect.top = translateY(rect.top);
+        rect.right = translateX(rect.right)+left;
+        rect.bottom = translateY(rect.bottom);
+
+
+
+        Log.d("OCrGraphic", "Box in " + rect.toString());
+        return rect;
+    }
+
+    private int firstStringPos(String str){
+        int pos =0;
+        for (char c:str.toCharArray()){
+            if (Character.isDigit(c)){
+                return pos;
+
+            }
+            else{
+                pos++;
+            }
+        }
+    return -1;
+    }
+
+
+
+    private boolean isNumeric(String str) {
+        try {
+            double d = Double.parseDouble(str.trim());
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+
+    private String removeText(String line) {
+        StringBuilder newText = new StringBuilder();
+
+
+        for (char c : line.toCharArray()) {
+
+            if (Character.isDigit(c)) {
+                newText.append(Character.toString(c));
+            }
+
+        }
+
+        return newText.toString();
+
+
+    }
+
+
 }

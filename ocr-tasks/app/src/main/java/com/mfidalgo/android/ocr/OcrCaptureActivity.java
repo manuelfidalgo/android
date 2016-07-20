@@ -25,6 +25,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.samples.vision.ocrreader.R;
+import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.mfidalgo.android.camera.CameraSource;
@@ -50,6 +52,7 @@ import com.mfidalgo.android.camera.CameraSourcePreview;
 import com.mfidalgo.android.camera.GraphicOverlay;
 
 import java.io.IOException;
+import java.util.Locale;
 
 /**
  * Activity for the Ocr Detecting app.  This app detects text and displays the value with the
@@ -85,6 +88,19 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+
+/*TODO test spanish
+        String languageToLoad  = "es"; // your language
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
+*/
+
+
+
         setContentView(R.layout.ocr_capture);
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
@@ -106,7 +122,7 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         gestureDetector = new GestureDetector(this, new CaptureGestureListener());
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
-        Snackbar.make(mGraphicOverlay, "Tap to Speak. Pinch/Stretch to zoom",
+        Snackbar.make(mGraphicOverlay, R.string.instructions,
                 Snackbar.LENGTH_LONG)
                 .show();
 
@@ -310,13 +326,13 @@ public final class OcrCaptureActivity extends AppCompatActivity {
 
     private boolean dialNumber(float rawX, float rawY) {
         OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
-        TextBlock text = null;
+        String text = null;
         if (graphic != null) {
             text = graphic.getTextBlock();
-            if (text != null && text.getValue() != null) {
-                Log.d(TAG, "Going to call! " + text.getValue());
+            if (text != null && text != null) {
+                Log.d(TAG, "Going to call! " + text);
 
-                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + text.getValue()));
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + text));
 
                 startActivity(intent);
 
@@ -349,13 +365,13 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         Log.d(TAG, "KKKK createContact");
 
         OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
-        TextBlock text = null;
+        String text = null;
         if (graphic != null) {
             text = graphic.getTextBlock();
-            if (text != null && text.getValue() != null) {
-                Log.d(TAG, "Creating new! " + text.getValue());
+            if (text != null) {
+                Log.d(TAG, "Creating new! " + text);
 
-                addAsContactConfirmed("new", text.getValue());
+                addAsContactConfirmed("new", text);
 
             } else {
                 Log.d(TAG, "text data is null");
