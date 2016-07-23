@@ -4,6 +4,6 @@
     <string name="low_storage_error">No se pueden descargar las dependencias de ocr (no hay suficiente espacio)</string>
     <string name="no_camera_permission">Esta aplicación necesita permisos para la cámara para poder ejecutarse</string>
     <string name="permission_camera_rationale">Se necesita acceso a la cámara para poder detectar texto</string>
-    <string name="read_text">Detectar texto</string>
+    <string name="number_reader">Lector de números</string>
     <string name="instructions">"Pulsa una vez en el número para llamar. Pulsa dos veces para guardar el número en la agenda"</string>
 </resources>

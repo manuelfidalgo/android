@@ -24,7 +24,7 @@
             android:value="ocr" />
 
         <activity android:name="com.mfidalgo.android.ocr.OcrCaptureActivity"
-            android:label="@string/read_text">
+            android:label="@string/number_reader">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
