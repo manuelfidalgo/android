@@ -25,7 +25,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,16 +42,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.samples.vision.ocrreader.R;
-import com.google.android.gms.vision.text.Text;
-import com.google.android.gms.vision.text.TextBlock;
+import com.mfidalgo.android.ocr.R;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.mfidalgo.android.camera.CameraSource;
 import com.mfidalgo.android.camera.CameraSourcePreview;
 import com.mfidalgo.android.camera.GraphicOverlay;
 
 import java.io.IOException;
-import java.util.Locale;
 
 /**
  * Activity for the Ocr Detecting app.  This app detects text and displays the value with the
@@ -60,18 +56,14 @@ import java.util.Locale;
  * size, and contents of each TextBlock.
  */
 public final class OcrCaptureActivity extends AppCompatActivity {
-    private static final String TAG = "OcrCaptureActivity";
-
-    // Intent request code to handle updating play services if needed.
-    private static final int RC_HANDLE_GMS = 9001;
-
-    // Permission request codes need to be < 256
-    private static final int RC_HANDLE_CAMERA_PERM = 2;
-
     // Constants used to pass extra data in the intent
     public static final String AutoFocus = "AutoFocus";
     public static final String UseFlash = "UseFlash";
-
+    private static final String TAG = "OcrCaptureActivity";
+    // Intent request code to handle updating play services if needed.
+    private static final int RC_HANDLE_GMS = 9001;
+    // Permission request codes need to be < 256
+    private static final int RC_HANDLE_CAMERA_PERM = 2;
     private CameraSource mCameraSource;
     private CameraSourcePreview mPreview;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
@@ -80,7 +72,10 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
-
+    /**
+     * Keeps a reference of the application context
+     */
+    private static Context sContext;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -88,6 +83,8 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        sContext = getApplicationContext();
+
 
 /*TODO test spanish
         String languageToLoad  = "es"; // your language
@@ -98,7 +95,6 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         getBaseContext().getResources().updateConfiguration(config,
                 getBaseContext().getResources().getDisplayMetrics());
 */
-
 
 
         setContentView(R.layout.ocr_capture);
@@ -127,6 +123,19 @@ public final class OcrCaptureActivity extends AppCompatActivity {
                 .show();
 
     }
+
+
+    /**
+     * Returns the application context
+     *
+     * @return application context
+     */
+    public static Context getContext() {
+        return sContext;
+    }
+
+
+
 
     /**
      * Handles the requesting of the camera permission.  This includes
@@ -323,7 +332,6 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     }
 
 
-
     private boolean dialNumber(float rawX, float rawY) {
         OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
         String text = null;
@@ -362,15 +370,11 @@ public final class OcrCaptureActivity extends AppCompatActivity {
 
 
     private boolean createContact(float rawX, float rawY) {
-        Log.d(TAG, "KKKK createContact");
-
         OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
         String text = null;
         if (graphic != null) {
             text = graphic.getTextBlock();
             if (text != null) {
-                Log.d(TAG, "Creating new! " + text);
-
                 addAsContactConfirmed("new", text);
 
             } else {
